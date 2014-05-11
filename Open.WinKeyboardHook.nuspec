@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Open.WinKeyboardHook</id>
+    <version>$version$</version>
+    <authors>
+      Lucas Ontivero &lt;lucasontivero@gmail.com&gt;
+    </authors>
+    <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://github.com/lontivero/Open.WinKeyboardHook</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+      A simple and easy-to-use .NET managed wrapper for Low Level Keyboard hooking.
+    </description>
+    <copyright>Please see LICENSE for more details.</copyright>
+    <tags>Keyboard hook intercept global event keyup keydown keypress </tags>
+  </metadata>
+</package>
