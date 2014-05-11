@@ -2,72 +2,37 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Text;
 using System.Windows.Forms;
-using Microsoft.Win32.SafeHandles;
 
 namespace Open.WinKeyboardHook
 {
-    internal sealed class SafeWinHandle : SafeHandleZeroOrMinusOneIsInvalid
-    {
-        public SafeWinHandle()
-            : base(true)
-        {
-        }
-
-        [SecurityCritical]
-        protected override bool ReleaseHandle()
-        {
-            if(IsInvalid)
-                return true;
-            return NativeMethods.UnhookWindowsHookEx(handle);
-        }
-    }
-
     public sealed class KeyboardInterceptor : IKeyboardInterceptor
     {
         private static DeadKeyInfo _lastDeadKey;
         private readonly KeysConverter _keyConverter = new KeysConverter();
-        private bool _isHooked;
 
-        private EventHandler<KeyEventArgs> _keyDown;
-        private EventHandler<KeyPressEventArgs> _keyPress;
-        private EventHandler<KeyEventArgs> _keyUp;
+        public event EventHandler<KeyEventArgs> KeyDown;
+        public event EventHandler<KeyPressEventArgs> KeyPress;
+        public event EventHandler<KeyEventArgs> KeyUp;
         private LowLevelKeyboardProc _keyboardProc;
-        private IntPtr _previousKeyboardHandler;
+        private SafeWinHandle _previousKeyboardHandler;
 
-        public KeyboardInterceptor()
+        public void StartCapturing()
         {
-            HookKeyboard();
+            if (_previousKeyboardHandler == null || _previousKeyboardHandler.IsClosed)
+            {
+                HookKeyboard();
+            }
         }
 
-        #region IKeyboardInterceptor Members
-
-        public event EventHandler<KeyEventArgs> KeyDown
+        public void StopCapturing()
         {
-            add { _keyDown += value; }
-            remove { if (_keyDown != null) _keyDown -= value; }
+            if (_previousKeyboardHandler != null) _previousKeyboardHandler.Close();
         }
-
-        public event EventHandler<KeyEventArgs> KeyUp
-        {
-            add { _keyUp += value; }
-            remove { if (_keyUp != null) _keyUp -= value; }
-        }
-
-        public event EventHandler<KeyPressEventArgs> KeyPress
-        {
-            add { _keyPress += value; }
-            remove { if (_keyPress != null) _keyPress -= value; }
-        }
-
-        #endregion
 
         private void HookKeyboard()
         {
-            VerifyPreviousHooking();
-
             _keyboardProc = keyboardHandler;
             using (var process = Process.GetCurrentProcess())
             {
@@ -78,61 +43,50 @@ namespace Open.WinKeyboardHook
                     _previousKeyboardHandler = NativeMethods.SetWindowsHookEx(
                         NativeMethods.WH_KEYBOARD_LL, _keyboardProc, moduleHandler, 0);
 
-                    Console.WriteLine(Marshal.GetLastWin32Error());
-                    //if (_previousKeyboardHandler.IsInvalid)
-                    //{
-                    //    throw new Win32Exception(Marshal.GetLastWin32Error());
-                    //}
-
-                    _isHooked = true;
+                    if (_previousKeyboardHandler.IsInvalid)
+                    {
+                        throw new Win32Exception(Marshal.GetLastWin32Error());
+                    }
                 }
-            }
-        }
-
-        private void VerifyPreviousHooking()
-        {
-            if (_isHooked)
-            {
-                throw new InvalidOperationException("It is already hooked");
             }
         }
 
         private IntPtr keyboardHandler(int nCode, IntPtr wParam, ref KBDLLHOOKSTRUCT kbdStruct)
         {
             IntPtr ret;
-            Console.WriteLine(Marshal.GetLastWin32Error());
 
             try
             {
                 if (nCode >= 0)
                 {
                     var virtualKeyCode = (Keys) kbdStruct.KeyCode;
-                    Keys keyData = BuildKeyData(virtualKeyCode);
+                    var keyData = BuildKeyData(virtualKeyCode);
                     var keyEventArgs = new KeyEventArgs(keyData);
 
                     var intParam = wParam.ToInt32();
-                    if (intParam == NativeMethods.WM_KEYDOWN || intParam == NativeMethods.WM_SYSKEYDOWN)
+                    switch (intParam)
                     {
-                        RaiseKeyDownEvent(keyEventArgs);
+                        case NativeMethods.WM_SYSKEYDOWN:
+                        case NativeMethods.WM_KEYDOWN:
+                            RaiseKeyDownEvent(keyEventArgs);
 
-                        string buffer = ToUnicode(kbdStruct);
-                        if (!string.IsNullOrEmpty(buffer))
-                        {
-                            foreach (char rawKey in buffer)
+                            var buffer = ToUnicode(kbdStruct);
+                            if (!string.IsNullOrEmpty(buffer))
                             {
-                                string s = _keyConverter.ConvertToString(rawKey);
-                                if (s != null)
+                                foreach (var rawKey in buffer)
                                 {
-                                    char key = s[0];
+                                    var s = _keyConverter.ConvertToString(rawKey);
+                                    if (s == null) continue;
+
+                                    var key = s[0];
                                     RaiseKeyPressEvent(key);
                                 }
                             }
-                        }
-                    }
-                    else if (intParam == NativeMethods.WM_KEYUP || intParam == NativeMethods.WM_SYSKEYUP)
-                    {
-                        Debug.Print("Release({0})", (int) virtualKeyCode);
-                        RaiseKeyUpEvent(keyEventArgs);
+                            break;
+                        case NativeMethods.WM_SYSKEYUP:
+                        case NativeMethods.WM_KEYUP:
+                            RaiseKeyUpEvent(keyEventArgs);
+                            break;
                     }
                 }
             }
@@ -167,7 +121,7 @@ namespace Open.WinKeyboardHook
 
         private void RaiseKeyPressEvent(char key)
         {
-            EventHandler<KeyPressEventArgs> keyPress = _keyPress;
+            var keyPress = KeyPress;
             if (keyPress != null)
             {
                 keyPress(this, new KeyPressEventArgs(key));
@@ -176,7 +130,7 @@ namespace Open.WinKeyboardHook
 
         private void RaiseKeyDownEvent(KeyEventArgs args)
         {
-            EventHandler<KeyEventArgs> keyDown = _keyDown;
+            var keyDown = KeyDown;
             if (keyDown != null)
             {
                 keyDown(this, args);
@@ -185,7 +139,7 @@ namespace Open.WinKeyboardHook
 
         private void RaiseKeyUpEvent(KeyEventArgs args)
         {
-            EventHandler<KeyEventArgs> keyUp = _keyUp;
+            var keyUp = KeyUp;
             if (keyUp != null)
             {
                 keyUp(this, args);
@@ -202,11 +156,11 @@ namespace Open.WinKeyboardHook
             var success = NativeMethods.GetKeyboardState(keyState);
             if(!success) return string.Empty;
 
-            bool isAltGr = IsKeyPressed(NativeMethods.VK_RMENU) && IsKeyPressed(NativeMethods.VK_LCONTROL);
+            var isAltGr = IsKeyPressed(NativeMethods.VK_RMENU) && IsKeyPressed(NativeMethods.VK_LCONTROL);
             if (isAltGr) keyState[NativeMethods.VK_LCONTROL] = keyState[NativeMethods.VK_LALT] = 0x80;
 
-            IntPtr layout = GetForegroundKeyboardLayout();
-            int count = ToUnicode((Keys) info.KeyCode, info.ScanCode, keyState, buffer, layout);
+            var layout = GetForegroundKeyboardLayout();
+            var count = ToUnicode((Keys) info.KeyCode, info.ScanCode, keyState, buffer, layout);
 
             if (count > 0)
             {
@@ -238,12 +192,12 @@ namespace Open.WinKeyboardHook
 
         private static IntPtr GetForegroundKeyboardLayout()
         {
-            IntPtr foregroundWnd = NativeMethods.GetForegroundWindow();
+            var foregroundWnd = NativeMethods.GetForegroundWindow();
 
             if (foregroundWnd != IntPtr.Zero)
             {
                 uint processId;
-                uint threadId = NativeMethods.GetWindowThreadProcessId(foregroundWnd, out processId);
+                var threadId = NativeMethods.GetWindowThreadProcessId(foregroundWnd, out processId);
 
                 return NativeMethods.GetKeyboardLayout(threadId);
             }

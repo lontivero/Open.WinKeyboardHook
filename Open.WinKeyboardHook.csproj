@@ -37,13 +37,11 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="IKeyInterceptor.cs" />
     <Compile Include="KeyboardInterceptor.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="SafeWinHandle.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

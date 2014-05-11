@@ -43,24 +43,15 @@ namespace Open.WinKeyboardHook
         internal const int WM_DEADCHAR = 0x0103;
         internal const int WM_SYSDEADCHAR = 0x0107;
 
-        //[DllImport("user32.dll")]
-        //internal static extern IntPtr CallNextHookEx(SafeWinHandle hhk, int nCode, IntPtr wParam, KBDLLHOOKSTRUCT lParam);
-
         [DllImport("user32.dll")]
-        internal static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, ref KBDLLHOOKSTRUCT lParam);
+        internal static extern IntPtr CallNextHookEx(SafeWinHandle hhk, int nCode, IntPtr wParam, ref KBDLLHOOKSTRUCT lParam);
 
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         internal static extern IntPtr GetModuleHandle(string lpModuleName);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        internal static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod,
+        internal static extern SafeWinHandle SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod,
                                                        uint dwThreadId);
-
-
-        //[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        //internal static extern SafeWinHandle SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod,
-        //                                               uint dwThreadId);
 
         [return: MarshalAs(UnmanagedType.Bool)]
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
@@ -71,7 +62,7 @@ namespace Open.WinKeyboardHook
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool GetKeyboardState(byte [] lpKeyState);
+        internal static extern bool GetKeyboardState(byte[] lpKeyState);
 
         [DllImport("user32.dll")]
         internal static extern uint MapVirtualKey(uint uCode, uint uMapType);
