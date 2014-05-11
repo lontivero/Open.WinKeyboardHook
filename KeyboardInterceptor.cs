@@ -1,4 +1,30 @@
-﻿using System;
+﻿//
+// Authors:
+//   Lucas Ontivero lucasontivero@gmail.com
+//
+// Copyright (C) 2014 Lucas Ontivero
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -101,11 +127,11 @@ namespace Open.WinKeyboardHook
 
         private static Keys BuildKeyData(Keys virtualKeyCode)
         {
-            bool isDownControl = IsKeyPressed(NativeMethods.VK_LCONTROL) || IsKeyPressed(NativeMethods.VK_RCONTROL);
-            bool isDownShift = IsKeyPressed(NativeMethods.VK_LSHIFT) || IsKeyPressed(NativeMethods.VK_RSHIFT);
-            bool isDownAlt = IsKeyPressed(NativeMethods.VK_LALT) || IsKeyPressed(NativeMethods.VK_RALT) ||
+            var isDownControl = IsKeyPressed(NativeMethods.VK_LCONTROL) || IsKeyPressed(NativeMethods.VK_RCONTROL);
+            var isDownShift = IsKeyPressed(NativeMethods.VK_LSHIFT) || IsKeyPressed(NativeMethods.VK_RSHIFT);
+            var isDownAlt = IsKeyPressed(NativeMethods.VK_LALT) || IsKeyPressed(NativeMethods.VK_RALT) ||
                              IsKeyPressed(NativeMethods.VK_RMENU);
-            bool isAltGr = IsKeyPressed(NativeMethods.VK_RMENU) && IsKeyPressed(NativeMethods.VK_LCONTROL);
+            var isAltGr = IsKeyPressed(NativeMethods.VK_RMENU) && IsKeyPressed(NativeMethods.VK_LCONTROL);
 
             return virtualKeyCode |
                    (isDownControl ? Keys.Control : Keys.None) |
