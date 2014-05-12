@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/lvi07odtaoeeohe3)](https://ci.appveyor.com/project/lontivero/open-winkeyboardhook)
+
 Open.WinKeyboardHook
 ====================
 
