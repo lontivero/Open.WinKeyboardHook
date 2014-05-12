@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/lvi07odtaoeeohe3)](https://ci.appveyor.com/project/lontivero/open-winkeyboardhook)
+[![Build status](https://ci.appveyor.com/api/projects/status/lvi07odtaoeeohe3)](https://ci.appveyor.com/project/lontivero/open-winkeyboardhook) [![NuGet version](https://badge.fury.io/nu/Open.WinKeyboardHook.svg)](http://badge.fury.io/nu/Open.WinKeyboardHook)
 
 Open.WinKeyboardHook
 ====================
