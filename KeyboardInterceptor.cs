@@ -114,6 +114,7 @@ namespace Open.WinKeyboardHook
                             RaiseKeyUpEvent(keyEventArgs);
                             break;
                     }
+                    if(keyEventArgs.SuppressKeyPress) return new IntPtr(1);
                 }
             }
             finally
