@@ -12,39 +12,39 @@ The main goal is to abstract away the complexities inherit to intercept and tran
 
 Usage
 -----
+```c#
+public partial class TestForm : Form
+{
+    private readonly IKeyboardInterceptor _interceptor;
 
-    public partial class TestForm : Form
+    public TestForm()
     {
-        private readonly IKeyboardInterceptor _interceptor;
+        InitializeComponent();
 
-        public TestForm()
-        {
-            InitializeComponent();
-
-            // Everytime a key is press we want to display it in a TextBox
-            _interceptor = new KeyboardInterceptor();
-            _interceptor.KeyPress += (sender, args) => txt.Text += args.KeyChar;
-        }
-
-        // Start and Stop capturing keystroks
-        private void BtnClick(object sender, EventArgs e)
-        {
-            if(!_capturing)
-            {
-                _interceptor.StartCapturing();
-                btn.Text = "Stop";
-                btn.BackColor = Color.Red;
-            }
-            else
-            {
-                _interceptor.StopCapturing();
-                btn.Text = "Start";
-                btn.BackColor = Color.Lime;
-            }
-            _capturing = !_capturing;
-        }
+        // Everytime a key is press we want to display it in a TextBox
+        _interceptor = new KeyboardInterceptor();
+        _interceptor.KeyPress += (sender, args) => txt.Text += args.KeyChar;
     }
 
+    // Start and Stop capturing keystroks
+    private void BtnClick(object sender, EventArgs e)
+    {
+        if(!_capturing)
+        {
+            _interceptor.StartCapturing();
+            btn.Text = "Stop";
+            btn.BackColor = Color.Red;
+        }
+        else
+        {
+            _interceptor.StopCapturing();
+            btn.Text = "Start";
+            btn.BackColor = Color.Lime;
+        }
+        _capturing = !_capturing;
+    }
+}
+```
 Real world example
 ------------------
 Open.WinKeyboardHook is been used as the key component in [KeyPadawan](https://github.com/lontivero/KeyPadawan) project, a useful tool for presentation and screencasts that allow to display the shortcuts that a presenter uses.
