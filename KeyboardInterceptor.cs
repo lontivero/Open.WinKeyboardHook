@@ -93,6 +93,8 @@ namespace Open.WinKeyboardHook
                     switch (intParam)
                     {
                         case NativeMethods.WM_SYSKEYDOWN:
+                            RaiseKeyDownEvent(keyEventArgs);
+                            break;
                         case NativeMethods.WM_KEYDOWN:
                             RaiseKeyDownEvent(keyEventArgs);
 
